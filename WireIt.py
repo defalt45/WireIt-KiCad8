@@ -24,6 +24,8 @@
 
 import pcbnew
 from pcbnew import *
+from pcbnew import FOOTPRINT
+
 
 import sys
 import os
@@ -180,8 +182,21 @@ class Pin(object):
 def get_netlist():
     """Create a dict with part ref & pad num as the key and attached net as the value."""
     netlist = {}
-    for pad in GetBoard().GetPads():
-        pad_key = pad.GetParent().GetReference(), pad.GetPadName()
+    for pad in GetBoard().GetPads():        
+        # Get the parent of the pad
+        parent = pad.GetParent()
+
+        # Initialize pad_key with a default value (e.g., None or an empty tuple)
+        pad_key = None
+
+        # Check if the parent is actually a Footprint
+        if isinstance(parent, FOOTPRINT):
+            # If it's a Footprint, get the reference
+            pad_key = parent.GetReference(), pad.GetPadName()
+        else:
+            # Handle the case where it's not a Footprint
+            print("Parent is not a Footprint. It's a:", type(parent))
+		
         netlist[pad_key] = pad.GetNetname(), pad.GetNetCode()
     return netlist
 
